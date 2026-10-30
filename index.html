@@ -415,5 +415,31 @@ document.addEventListener('DOMContentLoaded', async function() {
   new MutationObserver(addColumn).observe(document.documentElement, { childList: true, subtree: true });
 })();
 </script>
-<script>document.addEventListener("DOMContentLoaded",function(){var a=[...document.querySelectorAll("body *")].find(x=>x.children.length===0&&(x.textContent||"").trim().toUpperCase()==="CAMPAIGN");if(a){var t=a.parentElement.cloneNode(true);t.textContent="TEAM PARTNERSHIPS";a.parentElement.parentElement.insertBefore(t,a.parentElement.nextSibling);}});</script></body>
+<script>
+(function () {
+  function addTeamPartnershipsTab() {
+    if (document.querySelector('[data-team-partnerships-tab="1"]')) return true;
+    var campaignLeaf = Array.from(document.querySelectorAll('body *')).find(function (el) {
+      return el.children.length === 0 && (el.textContent || '').trim().toUpperCase() === 'CAMPAIGN';
+    });
+    if (!campaignLeaf) return false;
+    var campaign = campaignLeaf.closest('button,[role="tab"],a,div') || campaignLeaf.parentElement;
+    if (!campaign || !campaign.parentElement) return false;
+    var tab = campaign.cloneNode(true);
+    tab.setAttribute('data-team-partnerships-tab', '1');
+    tab.removeAttribute('id');
+    tab.removeAttribute('aria-current');
+    tab.removeAttribute('aria-selected');
+    tab.textContent = 'TEAM PARTNERSHIPS';
+    campaign.insertAdjacentElement('afterend', tab);
+    return true;
+  }
+  addTeamPartnershipsTab();
+  new MutationObserver(addTeamPartnershipsTab).observe(document.documentElement, { childList: true, subtree: true });
+  var tries = 0;
+  var timer = setInterval(function () {
+    if (addTeamPartnershipsTab() || ++tries > 120) clearInterval(timer);
+  }, 250);
+})();
+</script></body>
 </html>
