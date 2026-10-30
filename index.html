@@ -415,5 +415,5 @@ document.addEventListener('DOMContentLoaded', async function() {
   new MutationObserver(addColumn).observe(document.documentElement, { childList: true, subtree: true });
 })();
 </script>
-</body>
+<script>document.addEventListener("DOMContentLoaded",function(){var a=[...document.querySelectorAll("body *")].find(x=>x.children.length===0&&(x.textContent||"").trim().toUpperCase()==="CAMPAIGN");if(a){var t=a.parentElement.cloneNode(true);t.textContent="TEAM PARTNERSHIPS";a.parentElement.parentElement.insertBefore(t,a.parentElement.nextSibling);}});</script></body>
 </html>
