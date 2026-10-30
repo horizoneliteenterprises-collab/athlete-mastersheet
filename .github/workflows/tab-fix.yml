@@ -1,6 +1,8 @@
 name: Fix Team Partnerships tab
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/tab-fix.yml'
 permissions:
   contents: write
 jobs:
