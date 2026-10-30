@@ -11,18 +11,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Patch page
+        shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text()
-          marker='TEAM PARTNERSHIPS'
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'ATHLETE-MASTERSHEET-TEAM-PARTNERSHIPS-V3'
           if marker not in s:
-            s=s.replace('</body>', '<script>document.addEventListener("DOMContentLoaded",function(){var a=[...document.querySelectorAll("body *")].find(x=>x.children.length===0&&(x.textContent||"").trim().toUpperCase()==="CAMPAIGN");if(a){var t=a.parentElement.cloneNode(true);t.textContent="TEAM PARTNERSHIPS";a.parentElement.parentElement.insertBefore(t,a.parentElement.nextSibling);}});</script></body>',1)
-            p.write_text(s)
+              patch = r'''\n<script id="ATHLETE-MASTERSHEET-TEAM-PARTNERSHIPS-V3">\n(function(){\n  function fix(){\n    var leaves = Array.from(document.querySelectorAll('body *')).filter(function(el){\n      return !el.children.length && /^(CAMPAIGN|CAMPAIGNS)(\s*[·•-]\s*1)?$/i.test((el.textContent||'').trim());\n    });\n    for (var i=0;i<leaves.length;i++) {\n      var leaf = leaves[i];\n      var tab = leaf.closest('button,[role="tab"],a,div');\n      if (!tab || tab.getAttribute('data-team-partnerships-tab')) continue;\n      var text = (tab.textContent||'').trim().toUpperCase();\n      if (text.indexOf('CAMPAIGN') === -1) continue;\n      tab.setAttribute('data-team-partnerships-tab','campaign');\n      tab.textContent = 'CAMPAIGNS · 1';\n      var team = tab.cloneNode(true);\n      team.setAttribute('data-team-partnerships-tab','team');\n      team.removeAttribute('id');\n      team.removeAttribute('aria-selected');\n      team.textContent = 'TEAM PARTNERSHIPS · 0';\n      tab.parentNode.insertBefore(team, tab.nextSibling);\n      return true;\n    }\n    return false;\n  }\n  var observer = new MutationObserver(function(){ fix(); });\n  function start(){\n    if (!document.body) return;\n    observer.observe(document.body,{childList:true,subtree:true});\n    fix();\n    var n=0, timer=setInterval(function(){ if(fix() || ++n>200) clearInterval(timer); },100);\n  }\n  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();\n})();\n</script>\n'''
+              s = s.replace('</body>', patch + '</body>', 1)
+              p.write_text(s, encoding='utf-8')
           PY
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git commit -m "Add Team Partnerships tab beside Campaign" || exit 0
+          git commit -m "Match Team Partnerships navigation reference" || exit 0
           git push
